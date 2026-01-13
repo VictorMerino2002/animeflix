@@ -1,0 +1,26 @@
+use std::sync::Arc;
+
+use axum::{Router, routing::get};
+
+use crate::infrastructure::{
+    adapters::AnimeFlvClient,
+    http::routes::anime_routes::{get_anime_by_slug, get_episode_by_slug, search_anime},
+};
+
+mod domain;
+mod infrastructure;
+
+#[tokio::main]
+async fn main() {
+    let client = Arc::new(AnimeFlvClient::new());
+    let app = Router::new()
+        .route("/anime/{slug}", get(get_anime_by_slug))
+        .route("/anime/episode/{slug}", get(get_episode_by_slug))
+        .route("/anime/search", get(search_anime))
+        .with_state(client.clone());
+
+    let addrs = String::from("0.0.0.0:8080");
+    let listener = tokio::net::TcpListener::bind(&addrs).await.unwrap();
+    println!("Listening on: http://{}", &addrs);
+    axum::serve(listener, app).await.unwrap();
+}
