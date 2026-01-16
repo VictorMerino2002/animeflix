@@ -1,4 +1,4 @@
-use std::{error::Error, sync::Arc};
+use std::sync::Arc;
 
 use axum::{
     Json,
@@ -34,7 +34,7 @@ pub async fn get_episode_by_slug(
     Path(slug): Path<String>,
 ) -> impl IntoResponse {
     let response = client.get_episode_by_slug(&slug).await;
-    handle_response(response, StatusCode::NOT_FOUND);
+    handle_response(response, StatusCode::NOT_FOUND)
 }
 
 #[derive(Debug, Deserialize)]

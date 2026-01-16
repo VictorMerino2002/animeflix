@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::domain::entities::Episode;
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Anime {
     pub slug: Option<String>,
@@ -18,6 +20,8 @@ pub struct Anime {
     pub next_airing_episode: Option<String>,
     #[serde(default)]
     pub related: Vec<AnimeRelation>,
+    #[serde(default)]
+    pub episodes: Vec<Episode>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
