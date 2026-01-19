@@ -7,6 +7,8 @@ pub struct Episode {
     pub number: i32,
     #[serde(default)]
     pub servers: Vec<Server>,
+    #[serde(default)]
+    pub seen: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

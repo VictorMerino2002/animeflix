@@ -6,7 +6,7 @@ use crate::domain::value_objects::Pagination;
 use crate::infrastructure::value_objects::AnimeFlvApiResponse;
 
 #[derive(Debug, thiserror::Error)]
-pub enum AnimeFlvError {
+pub enum HttpError {
     #[error("http error")]
     Http(#[from] reqwest::Error),
 
@@ -28,7 +28,7 @@ impl AnimeFlvClient {
         }
     }
 
-    pub async fn get_anime_by_slug(&self, slug: &str) -> Result<Anime, AnimeFlvError> {
+    pub async fn get_anime_by_slug(&self, slug: &str) -> Result<Anime, HttpError> {
         let url = self.base_url.join("anime/")?.join(slug)?;
 
         let response: AnimeFlvApiResponse<Anime> =
@@ -37,7 +37,7 @@ impl AnimeFlvClient {
         Ok(response.data)
     }
 
-    pub async fn get_episode_by_slug(&self, slug: &str) -> Result<Episode, AnimeFlvError> {
+    pub async fn get_episode_by_slug(&self, slug: &str) -> Result<Episode, HttpError> {
         let url = self.base_url.join("anime/episode/")?.join(slug)?;
 
         let response: AnimeFlvApiResponse<Episode> =
@@ -50,7 +50,7 @@ impl AnimeFlvClient {
         &self,
         query: &str,
         page: u32,
-    ) -> Result<Pagination<Anime>, AnimeFlvError> {
+    ) -> Result<Pagination<Anime>, HttpError> {
         let mut url = self.base_url.join("search")?;
 
         url.query_pairs_mut()

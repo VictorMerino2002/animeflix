@@ -1,39 +1,34 @@
 use std::sync::Arc;
 
 use axum::{
-    Json,
     extract::{Path, Query, State},
-    response::{IntoResponse, Response},
+    response::IntoResponse,
 };
 use reqwest::StatusCode;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
-use crate::{domain::value_objects::ApiResponse, infrastructure::adapters::AnimeFlvClient};
-
-fn handle_response<T, E>(response: Result<T, E>, error_status_code: StatusCode) -> Response
-where
-    T: Serialize,
-    E: std::fmt::Display,
-{
-    match response {
-        Ok(ok) => (StatusCode::OK, Json(ApiResponse::success(ok))).into_response(),
-        Err(err) => (error_status_code, Json(ApiResponse::error(err.to_string()))).into_response(),
-    }
-}
+use crate::{
+    application::use_cases::GetAnimeUseCase,
+    infrastructure::{di::DepContianer, http::route_utils::handle_response},
+};
 
 pub async fn get_anime_by_slug(
-    State(client): State<Arc<AnimeFlvClient>>,
-    Path(slug): Path<String>,
+    State(container): State<Arc<DepContianer>>,
+    Path((slug, user_uuid)): Path<(String, String)>,
 ) -> impl IntoResponse {
-    let result = client.get_anime_by_slug(&slug).await;
-    handle_response(result, StatusCode::NOT_FOUND)
+    let use_case = GetAnimeUseCase::new(
+        container.anime_client.clone(),
+        container.user_history_repository.clone(),
+    );
+    let response = use_case.execute(&slug, &user_uuid).await;
+    handle_response(response, StatusCode::NOT_FOUND)
 }
 
 pub async fn get_episode_by_slug(
-    State(client): State<Arc<AnimeFlvClient>>,
+    State(container): State<Arc<DepContianer>>,
     Path(slug): Path<String>,
 ) -> impl IntoResponse {
-    let response = client.get_episode_by_slug(&slug).await;
+    let response = container.anime_client.get_episode_by_slug(&slug).await;
     handle_response(response, StatusCode::NOT_FOUND)
 }
 
@@ -44,9 +39,12 @@ pub struct SearchQuery {
 }
 
 pub async fn search_anime(
-    State(client): State<Arc<AnimeFlvClient>>,
+    State(container): State<Arc<DepContianer>>,
     Query(params): Query<SearchQuery>,
 ) -> impl IntoResponse {
-    let response = client.search_anime(&params.query, params.page).await;
+    let response = container
+        .anime_client
+        .search_anime(&params.query, params.page)
+        .await;
     handle_response(response, StatusCode::NOT_FOUND)
 }

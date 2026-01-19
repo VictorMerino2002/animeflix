@@ -22,6 +22,7 @@ pub struct Anime {
     pub related: Vec<AnimeRelation>,
     #[serde(default)]
     pub episodes: Vec<Episode>,
+    pub last_episode_number_seen: Option<i32>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
