@@ -10,13 +10,15 @@ CREATE TABLE user_history (
   episode_num INT NOT NULL,
   episode_slug VARCHAR(255) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
   user_uuid VARCHAR(255) NOT NULL,
 
   CONSTRAINT fk_user_history_user
     FOREIGN KEY (user_uuid)
     REFERENCES users(uuid)
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+
+  CONSTRAINT user_history_unique
+    UNIQUE (anime_slug, episode_slug, user_uuid)
 );
 
 CREATE INDEX idx_user_history_user

@@ -31,4 +31,20 @@ impl SqlUserRepository {
 
         Ok(())
     }
+
+    pub async fn get_by_username(&self, username: &str) -> Result<Option<User>, sqlx::Error> {
+        let user = sqlx::query_as!(User, "SELECT * FROM users WHERE username = $1", username)
+            .fetch_optional(&self.pool)
+            .await?;
+
+        Ok(user)
+    }
+
+    pub async fn exist_by_username(&self, username: &str) -> Result<bool, sqlx::Error> {
+        let option = sqlx::query!("SELECT * FROM users WHERE username = $1", username)
+            .fetch_optional(&self.pool)
+            .await?;
+
+        Ok(option.is_some())
+    }
 }

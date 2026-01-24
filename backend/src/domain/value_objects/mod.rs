@@ -1,7 +1,5 @@
-mod api_response;
-mod filter;
+mod error;
 mod pagination;
 
-pub use api_response::ApiResponse;
-pub use filter::Filter;
+pub use error::Error;
 pub use pagination::Pagination;

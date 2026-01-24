@@ -9,13 +9,13 @@ pub struct User {
 }
 
 impl User {
-    pub fn new(username: String, password: String) -> Self {
+    pub fn new(username: &str, password: &str) -> Self {
         let uuid = Uuid::new_v4();
 
         Self {
             uuid: uuid.to_string(),
-            username,
-            password: Some(password),
+            username: username.to_string(),
+            password: Some(password.to_string()),
         }
     }
 }

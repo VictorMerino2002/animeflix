@@ -1,37 +1,29 @@
-use std::{collections::HashSet, error::Error, sync::Arc};
+use std::{collections::HashSet, sync::Arc};
 
 use crate::{
-    domain::entities::Anime,
+    domain::{entities::Anime, value_objects::Error},
     infrastructure::adapters::{AnimeFlvClient, SqlUserHistoryRepository},
 };
 
-pub struct GetAnimeUseCase {
-    anime_client: Arc<AnimeFlvClient>,
-    user_history_repository: Arc<SqlUserHistoryRepository>,
+pub struct GetAnimeBySlugUseCase {
+    pub anime_client: Arc<AnimeFlvClient>,
+    pub user_history_repository: Arc<SqlUserHistoryRepository>,
 }
 
-impl GetAnimeUseCase {
-    pub fn new(
-        anime_client: Arc<AnimeFlvClient>,
-        user_history_repository: Arc<SqlUserHistoryRepository>,
-    ) -> Self {
-        Self {
-            anime_client,
-            user_history_repository,
-        }
-    }
-
-    pub async fn execute(
-        &self,
-        anime_slug: &str,
-        user_uuid: &str,
-    ) -> Result<Anime, Box<dyn Error>> {
-        let mut anime = self.anime_client.get_anime_by_slug(anime_slug).await?;
+impl GetAnimeBySlugUseCase {
+    pub async fn execute(&self, anime_slug: &str, user_uuid: &str) -> Result<Anime, Error> {
+        let error_msg = format!("Error trying to get anime whit slug: `{}`", anime_slug);
+        let mut anime = self
+            .anime_client
+            .get_anime_by_slug(anime_slug)
+            .await
+            .map_err(|_| Error::not_found(&error_msg))?;
 
         let episode_history = self
             .user_history_repository
             .get_user_episode_history_by_anime(anime_slug, user_uuid)
-            .await?;
+            .await
+            .map_err(|_| Error::internal_server(&error_msg))?;
 
         let seen_slugs: HashSet<String> = episode_history
             .iter()

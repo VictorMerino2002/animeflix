@@ -4,47 +4,66 @@ use axum::{
     extract::{Path, Query, State},
     response::IntoResponse,
 };
-use reqwest::StatusCode;
 use serde::Deserialize;
 
 use crate::{
-    application::use_cases::GetAnimeUseCase,
-    infrastructure::{di::DepContianer, http::route_utils::handle_response},
+    application::use_cases::{
+        GetAnimeBySlugUseCase, GetEpisodeBySlugAndAddToHistoryUseCase, SearchAnimeUseCase,
+    },
+    infrastructure::{
+        bootstrap::DepContianer,
+        http::{
+            ApiResponse,
+            extractors::{AuthToken, AuthUser},
+        },
+    },
 };
 
-pub async fn get_anime_by_slug(
-    State(container): State<Arc<DepContianer>>,
-    Path((slug, user_uuid)): Path<(String, String)>,
-) -> impl IntoResponse {
-    let use_case = GetAnimeUseCase::new(
-        container.anime_client.clone(),
-        container.user_history_repository.clone(),
-    );
-    let response = use_case.execute(&slug, &user_uuid).await;
-    handle_response(response, StatusCode::NOT_FOUND)
-}
-
-pub async fn get_episode_by_slug(
-    State(container): State<Arc<DepContianer>>,
-    Path(slug): Path<String>,
-) -> impl IntoResponse {
-    let response = container.anime_client.get_episode_by_slug(&slug).await;
-    handle_response(response, StatusCode::NOT_FOUND)
-}
-
 #[derive(Debug, Deserialize)]
-pub struct SearchQuery {
+pub struct SearchQueryParams {
     page: u32,
     query: String,
 }
 
 pub async fn search_anime(
+    AuthToken(_): AuthToken,
     State(container): State<Arc<DepContianer>>,
-    Query(params): Query<SearchQuery>,
+    Query(params): Query<SearchQueryParams>,
 ) -> impl IntoResponse {
-    let response = container
-        .anime_client
-        .search_anime(&params.query, params.page)
+    let use_case = SearchAnimeUseCase {
+        anime_client: container.anime_client.clone(),
+    };
+
+    let pagination = use_case.execute(&params.query, params.page).await;
+    ApiResponse::default(pagination)
+}
+
+pub async fn get_anime_by_slug(
+    AuthUser(user): AuthUser,
+    State(container): State<Arc<DepContianer>>,
+    Path(slug): Path<String>,
+) -> impl IntoResponse {
+    let use_case = GetAnimeBySlugUseCase {
+        anime_client: container.anime_client.clone(),
+        user_history_repository: container.user_history_repository.clone(),
+    };
+
+    let anime = use_case.execute(&slug, &user.uuid).await;
+    ApiResponse::default(anime)
+}
+
+pub async fn get_episode_by_slug(
+    AuthUser(user): AuthUser,
+    State(container): State<Arc<DepContianer>>,
+    Path((anime_slug, episode_slug)): Path<(String, String)>,
+) -> impl IntoResponse {
+    let use_case = GetEpisodeBySlugAndAddToHistoryUseCase {
+        anime_client: container.anime_client.clone(),
+        user_history_repository: container.user_history_repository.clone(),
+    };
+
+    let episode = use_case
+        .execute(&episode_slug, &anime_slug, &user.uuid)
         .await;
-    handle_response(response, StatusCode::NOT_FOUND)
+    ApiResponse::default(episode)
 }

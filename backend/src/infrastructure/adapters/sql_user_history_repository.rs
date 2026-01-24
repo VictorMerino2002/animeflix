@@ -21,6 +21,10 @@ impl SqlUserHistoryRepository {
             r#"
         INSERT INTO user_history (uuid, anime_slug, episode_slug, episode_num, user_uuid)
         VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (anime_slug, episode_slug, user_uuid)
+        DO UPDATE SET
+            uuid = EXCLUDED.uuid,
+            created_at = CURRENT_TIMESTAMP
         "#,
             user_history.uuid,
             user_history.anime_slug,
