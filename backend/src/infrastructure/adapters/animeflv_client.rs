@@ -62,4 +62,13 @@ impl AnimeFlvClient {
 
         Ok(response.data)
     }
+
+    pub async fn get_on_air_animes(&self) -> Result<Vec<Anime>, HttpError> {
+        let url = self.base_url.join("list/animes-on-air")?;
+
+        let response: AnimeFlvApiResponse<Vec<Anime>> =
+            self.client.get(url).send().await?.json().await?;
+
+        Ok(response.data)
+    }
 }

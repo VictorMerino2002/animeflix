@@ -8,7 +8,8 @@ use serde::Deserialize;
 
 use crate::{
     application::use_cases::{
-        GetAnimeBySlugUseCase, GetEpisodeBySlugAndAddToHistoryUseCase, SearchAnimeUseCase,
+        GetAnimeBySlugUseCase, GetEpisodeBySlugAndAddToHistoryUseCase, GetOnAirAnimesUseCase,
+        GetUserAnimeHistoryUseCase, SearchAnimeUseCase,
     },
     infrastructure::{
         bootstrap::DepContianer,
@@ -66,4 +67,29 @@ pub async fn get_episode_by_slug(
         .execute(&episode_slug, &anime_slug, &user.uuid)
         .await;
     ApiResponse::default(episode)
+}
+
+pub async fn get_on_air_animes(
+    AuthToken(_): AuthToken,
+    State(container): State<Arc<DepContianer>>,
+) -> impl IntoResponse {
+    let use_case = GetOnAirAnimesUseCase {
+        anime_client: container.anime_client.clone(),
+    };
+
+    let animes = use_case.execute().await;
+    ApiResponse::default(animes)
+}
+
+pub async fn get_anime_history(
+    AuthUser(user): AuthUser,
+    State(container): State<Arc<DepContianer>>,
+) -> impl IntoResponse {
+    let use_case = GetUserAnimeHistoryUseCase {
+        user_history_repository: container.user_history_repository.clone(),
+        anime_client: container.anime_client.clone(),
+    };
+
+    let animes = use_case.execute(&user.uuid).await;
+    ApiResponse::default(animes)
 }

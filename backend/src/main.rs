@@ -8,7 +8,10 @@ use tower_http::cors::{Any, CorsLayer};
 use crate::infrastructure::{
     bootstrap::setup,
     http::routes::{
-        anime_routes::{get_anime_by_slug, get_episode_by_slug, search_anime},
+        anime_routes::{
+            get_anime_by_slug, get_anime_history, get_episode_by_slug, get_on_air_animes,
+            search_anime,
+        },
         auth_routes::{login, register},
     },
 };
@@ -32,7 +35,9 @@ async fn main() {
         .route("/auth/register", post(register))
         .route("/auth/login", post(login))
         // ANIME
+        .route("/anime/list/on-air", get(get_on_air_animes))
         .route("/anime/search", get(search_anime))
+        .route("/anime/history", get(get_anime_history))
         .route("/anime/{slug}", get(get_anime_by_slug))
         .route(
             "/anime/{anime_slug}/episode/{episode_slug}",

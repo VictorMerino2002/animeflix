@@ -11,11 +11,14 @@ pub struct Anime {
     pub url: String,
     #[serde(default)]
     pub alternative_titles: Vec<String>,
+    #[serde(default)]
     pub cover: String,
     #[serde(default)]
     pub genres: Vec<String>,
+    #[serde(default)]
     pub rating: String,
     pub status: Option<String>,
+    #[serde(default)]
     pub synopsis: String,
     pub next_airing_episode: Option<String>,
     #[serde(default)]

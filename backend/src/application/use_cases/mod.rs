@@ -1,6 +1,8 @@
 mod create_user_use_case;
 mod get_anime_by_slug_use_case;
 mod get_episode_by_slug_and_add_to_history_use_case;
+mod get_on_air_animes_use_case;
+mod get_user_anime_history_use_case;
 mod get_user_from_token_use_case;
 mod login_use_case;
 mod search_anime_use_case;
@@ -8,6 +10,8 @@ mod search_anime_use_case;
 pub use create_user_use_case::CreateUserUseCase;
 pub use get_anime_by_slug_use_case::GetAnimeBySlugUseCase;
 pub use get_episode_by_slug_and_add_to_history_use_case::GetEpisodeBySlugAndAddToHistoryUseCase;
+pub use get_on_air_animes_use_case::GetOnAirAnimesUseCase;
+pub use get_user_anime_history_use_case::GetUserAnimeHistoryUseCase;
 pub use get_user_from_token_use_case::GetUserFromTokenUseCase;
 pub use login_use_case::LoginUseCase;
 pub use search_anime_use_case::SearchAnimeUseCase;
