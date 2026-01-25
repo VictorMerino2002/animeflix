@@ -1,0 +1,29 @@
+.NavBar {
+  background: var(--ant-layout-body-bg);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  padding: 10px;
+}
+
+.NavBar-search {
+  width: 100%;
+  max-width: 300px;
+}
+
+.NavBar-search-input {
+  width: 0;
+  max-width: 300px;
+  padding: 0;
+  border: none;
+  transition: all .3s;
+}
+
+.NavBar-search-input.open {
+  width: 100%;
+  padding: 8px;
+  border-radius: 0;
+  border: 2px solid var(--ant-color-primary);
+}

@@ -18,6 +18,7 @@ impl GetAnimeBySlugUseCase {
             .get_anime_by_slug(anime_slug)
             .await
             .map_err(|_| Error::not_found(&error_msg))?;
+        anime.slug = Some(anime_slug.to_string());
 
         let episode_history = self
             .user_history_repository

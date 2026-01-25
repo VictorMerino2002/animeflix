@@ -1,0 +1,35 @@
+.Carousel {
+  position: relative;
+}
+
+.Carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  height: 80%;
+}
+
+.Carousel-btn.left {
+  left: 0;
+}
+
+.Carousel-btn.right {
+  right: 0;
+}
+
+.Carousel-scroll {
+  overflow-x: auto;
+  overflow-y: visible;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.Carousel-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.Carousel-track {
+  padding: 50px 0;
+  overflow: visible;
+}

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     domain::{entities::Anime, value_objects::Error},
-    infrastructure::adapters::{AnimeFlvClient, SqlUserHistoryRepository},
+    infrastructure::adapters::{AnimeFlvClient, HttpError, SqlUserHistoryRepository},
 };
 use futures::future::join_all;
 
@@ -21,12 +21,18 @@ impl GetUserAnimeHistoryUseCase {
 
         let anime_futures = history_records
             .iter()
-            .map(|record| self.anime_client.get_anime_by_slug(&record.anime_slug));
+            .map(|record| self.get_anime(&record.anime_slug));
 
         let results = join_all(anime_futures).await;
 
         let animes: Vec<Anime> = results.into_iter().filter_map(Result::ok).collect();
 
         Ok(animes)
+    }
+
+    async fn get_anime(&self, slug: &str) -> Result<Anime, HttpError> {
+        let mut anime = self.anime_client.get_anime_by_slug(slug).await?;
+        anime.slug = Some(slug.to_string());
+        Ok(anime)
     }
 }
