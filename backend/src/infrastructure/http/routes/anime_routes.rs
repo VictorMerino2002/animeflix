@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
 use axum::{
+    Json,
+    body::Bytes,
     extract::{Path, Query, State},
     response::IntoResponse,
 };
@@ -9,8 +11,9 @@ use serde::Deserialize;
 use crate::{
     application::use_cases::{
         GetAnimeBySlugUseCase, GetEpisodeBySlugAndAddToHistoryUseCase, GetOnAirAnimesUseCase,
-        GetUserAnimeHistoryUseCase, SearchAnimeUseCase,
+        GetUserAnimeHistoryUseCase, SearchAnimeByFiltersUseCase, SearchAnimeUseCase,
     },
+    domain::value_objects::{Error, Filters},
     infrastructure::{
         bootstrap::DepContianer,
         http::{
@@ -92,4 +95,34 @@ pub async fn get_anime_history(
 
     let animes = use_case.execute(&user.uuid).await;
     ApiResponse::default(animes)
+}
+
+#[derive(Deserialize)]
+pub struct SearchByFiltersQueryParams {
+    pub page: u32,
+    pub order: String,
+}
+
+pub async fn search_anime_by_filters(
+    AuthToken(_): AuthToken,
+    State(container): State<Arc<DepContianer>>,
+    Query(query): Query<SearchByFiltersQueryParams>,
+    body: Bytes,
+) -> impl IntoResponse {
+    let filters: Option<Filters> = if body.is_empty() {
+        None
+    } else {
+        match serde_json::from_slice(&body) {
+            Ok(f) => Some(f),
+            Err(_) => {
+                return ApiResponse::default(Err(Error::bad_request("Invalid Json body")));
+            }
+        }
+    };
+
+    let use_case = SearchAnimeByFiltersUseCase {
+        anime_client: container.anime_client.clone(),
+    };
+    let result = use_case.execute(filters, query.page, &query.order).await;
+    ApiResponse::default(result)
 }

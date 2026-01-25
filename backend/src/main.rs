@@ -10,7 +10,7 @@ use crate::infrastructure::{
     http::routes::{
         anime_routes::{
             get_anime_by_slug, get_anime_history, get_episode_by_slug, get_on_air_animes,
-            search_anime,
+            search_anime, search_anime_by_filters,
         },
         auth_routes::{login, register},
     },
@@ -37,6 +37,7 @@ async fn main() {
         // ANIME
         .route("/anime/list/on-air", get(get_on_air_animes))
         .route("/anime/search", get(search_anime))
+        .route("/anime/search/by-filters", post(search_anime_by_filters))
         .route("/anime/history", get(get_anime_history))
         .route("/anime/{slug}", get(get_anime_by_slug))
         .route(

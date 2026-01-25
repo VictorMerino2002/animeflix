@@ -2,7 +2,7 @@ use reqwest::Client;
 use url::Url;
 
 use crate::domain::entities::{Anime, Episode};
-use crate::domain::value_objects::Pagination;
+use crate::domain::value_objects::{Filters, Pagination};
 use crate::infrastructure::value_objects::AnimeFlvApiResponse;
 
 #[derive(Debug, thiserror::Error)]
@@ -68,6 +68,33 @@ impl AnimeFlvClient {
 
         let response: AnimeFlvApiResponse<Vec<Anime>> =
             self.client.get(url).send().await?.json().await?;
+
+        Ok(response.data)
+    }
+
+    pub async fn search_anime_by_filters(
+        &self,
+        filters: Option<Filters>,
+        page: u32,
+        order: &str,
+    ) -> Result<Pagination<Anime>, HttpError> {
+        let mut url = self.base_url.join("search/by-filter")?;
+
+        url.query_pairs_mut()
+            .append_pair("order", order)
+            .append_pair("page", &page.to_string());
+
+        let mut request_builder = self
+            .client
+            .post(url)
+            .header("Content-Type", "application/json");
+
+        if let Some(f) = filters {
+            request_builder = request_builder.json(&f);
+        }
+
+        let response: AnimeFlvApiResponse<Pagination<Anime>> =
+            request_builder.send().await?.json().await?;
 
         Ok(response.data)
     }

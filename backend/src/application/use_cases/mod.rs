@@ -5,6 +5,7 @@ mod get_on_air_animes_use_case;
 mod get_user_anime_history_use_case;
 mod get_user_from_token_use_case;
 mod login_use_case;
+mod search_anime_by_filters_use_case;
 mod search_anime_use_case;
 
 pub use create_user_use_case::CreateUserUseCase;
@@ -14,4 +15,5 @@ pub use get_on_air_animes_use_case::GetOnAirAnimesUseCase;
 pub use get_user_anime_history_use_case::GetUserAnimeHistoryUseCase;
 pub use get_user_from_token_use_case::GetUserFromTokenUseCase;
 pub use login_use_case::LoginUseCase;
+pub use search_anime_by_filters_use_case::SearchAnimeByFiltersUseCase;
 pub use search_anime_use_case::SearchAnimeUseCase;
